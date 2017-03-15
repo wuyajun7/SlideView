@@ -14,7 +14,7 @@ import android.widget.Scroller;
  */
 public class NNSliderView extends ViewGroup {
     //速度边界
-    private final int VELOCITY_XY_SPEED = 4200;
+    private final int VELOCITY_XY_SPEED = 4000;
     //点击 辩识 范围
     private final int CLICK_DISTANCE = 5;
     //滚动速度
