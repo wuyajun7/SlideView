@@ -90,14 +90,13 @@ public class MainActivity extends AppCompatActivity {
                     case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
                         break;
                     case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
-                        if (!sliderView.isSlided()) {
-                            sliderView.setSlided(!sliderView.isSlided());
+                        if (!sliderView.menuIsClose()) {
+                            sliderView.closeMenu();
                         }
                         break;
                     case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
                         break;
                 }
-
             }
 
             @Override
@@ -107,8 +106,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void grBrandItemClickListener(AdapterView<?> parent, int position) {
-        if (sliderView.isSlided()) {//如果是关闭状态则打开，否则不处理
-            sliderView.setSlided(!sliderView.isSlided());
+        if (sliderView.menuIsClose()) {//如果是关闭状态则打开，否则不处理
+            sliderView.openMenu();
         }
         Object object = parent.getItemAtPosition(position);
         if (object != null) {

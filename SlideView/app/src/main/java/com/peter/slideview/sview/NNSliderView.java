@@ -15,8 +15,6 @@ import android.widget.Scroller;
 public class NNSliderView extends ViewGroup {
     //速度边界
     private final int VELOCITY_XY_SPEED = 4200;
-    //持续滑动距离|如果持续滑动此距离 则 认为要收回menu
-    private final int SLIDE_DISTANCE = 220;
     //点击 辩识 范围
     private final int CLICK_DISTANCE = 5;
     //滚动速度
@@ -26,7 +24,7 @@ public class NNSliderView extends ViewGroup {
     private Scroller scroller;
     /* 触摸事件是否已分发给子view */
     private boolean dispatched;
-    private boolean menuStatus = true;
+    private boolean isClose = true;
 
     private int startScrollLeftOffset;
     private VelocityTracker mVelocityTracker;
@@ -49,7 +47,7 @@ public class NNSliderView extends ViewGroup {
                 view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
             }
         }
-        if (!menuStatus) return;
+        if (!isClose) return;
         scroller.startScroll(0, getTop(), arg3, 0, 0);//默认隐藏
 
         mChildAt0 = getChildAt(0);
@@ -59,7 +57,7 @@ public class NNSliderView extends ViewGroup {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (!menuStatus) { //区域拦截
+        if (!isClose) { //区域拦截
             if (ev.getX() < mChildAt1.getWidth() / 4) {
                 return false;
             }
@@ -96,7 +94,7 @@ public class NNSliderView extends ViewGroup {
 
             touchX = event.getX();
 
-            if (isSlided()) {//分发事件
+            if (menuIsClose()) {//分发事件
                 dispatched = dispatchTouchEventToView(mChildAt0, event);
             } else {
                 dispatched = dispatchTouchEventToView(mChildAt1, event);
@@ -106,7 +104,7 @@ public class NNSliderView extends ViewGroup {
             mEndY = event.getY();
 
             if (dispatched) {//分发事件
-                if (isSlided()) {
+                if (menuIsClose()) {
                     dispatchTouchEventToView(mChildAt0, event);
                 } else {
                     if (Math.abs(mEndY - mStartY) > minMove && Math.abs(mEndX - mStartX) < maxUDMove) {//向上|向下
@@ -122,15 +120,13 @@ public class NNSliderView extends ViewGroup {
             touchX = event.getX();
         } else if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
             if (dispatched) {//分发事件
-                if (isSlided()) {
+                if (menuIsClose()) {
                     dispatchTouchEventToView(mChildAt0, event);
                 } else {
                     if (Math.abs(mEndX - mStartX) < CLICK_DISTANCE && Math.abs(mEndY - mStartY) < CLICK_DISTANCE) {
                         event.setLocation(event.getX(), event.getY());
                         dispatchTouchEventToView(mChildAt1, event);
-                    }/* else if (Math.abs(mEndX - mStartX) > SLIDE_DISTANCE) {
-                        setSlided(true);
-                    } */ else {
+                    } else {
                         patchView(event);
                     }
                 }
@@ -159,7 +155,7 @@ public class NNSliderView extends ViewGroup {
                         setSlided(false);
                     }
                 }
-            }else{
+            } else {
                 setSlided(false);
             }
 
@@ -188,30 +184,34 @@ public class NNSliderView extends ViewGroup {
         }
     }
 
-    public boolean isSlided() {
-        return menuStatus;
+    public boolean menuIsClose() {
+        return isClose;
     }
 
     /**
      * 设置是否滑动显示菜单状态，并动画滑动效果
      *
-     * @param slided
+     * @param isClose
      */
-    public void setSlided(boolean slided) {
+    public void setSlided(boolean isClose) {
         if (mChildAt1 != null) {
             startScrollLeftOffset = mChildAt1.getLeft();
-            if (slided) {
+            if (isClose) {
                 scroller.startScroll(0, getTop(), mChildAt1.getWidth() - startScrollLeftOffset, 0, SCROLL_SPEED);
             } else {
                 scroller.startScroll(0, getTop(), -startScrollLeftOffset, 0, SCROLL_SPEED);
             }
         }
-        this.menuStatus = slided;
+        this.isClose = isClose;
         postInvalidate();
     }
 
     public void closeMenu() {
         setSlided(true);
+    }
+
+    public void openMenu() {
+        setSlided(false);
     }
 
     @Override
