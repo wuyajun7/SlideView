@@ -14,7 +14,7 @@ import android.widget.Scroller;
  */
 public class NNSliderView extends ViewGroup {
     //速度边界
-    private final int VELOCITY_X_SPEED = 6800;
+    private final int VELOCITY_XY_SPEED = 4200;
     //持续滑动距离|如果持续滑动此距离 则 认为要收回menu
     private final int SLIDE_DISTANCE = 220;
     //点击 辩识 范围
@@ -128,9 +128,9 @@ public class NNSliderView extends ViewGroup {
                     if (Math.abs(mEndX - mStartX) < CLICK_DISTANCE && Math.abs(mEndY - mStartY) < CLICK_DISTANCE) {
                         event.setLocation(event.getX(), event.getY());
                         dispatchTouchEventToView(mChildAt1, event);
-                    } else if (Math.abs(mEndX - mStartX) > SLIDE_DISTANCE) {
+                    }/* else if (Math.abs(mEndX - mStartX) > SLIDE_DISTANCE) {
                         setSlided(true);
-                    } else {
+                    } */ else {
                         patchView(event);
                     }
                 }
@@ -145,17 +145,24 @@ public class NNSliderView extends ViewGroup {
         mVelocityTracker.computeCurrentVelocity(1200);//-1000 //判断速度
         if (touchX >= mChildAt1.getWidth() / 4) {
             int velocityX = (int) mVelocityTracker.getXVelocity();
-            if (velocityX > VELOCITY_X_SPEED) {
-                setSlided(true);
-            } else if (velocityX < -VELOCITY_X_SPEED) {
-                setSlided(false);
-            } else {
-                if (mChildAt1.getLeft() >= mSlideMaxLimit - 20) {
+            int velocityY = (int) mVelocityTracker.getYVelocity();
+
+            if (velocityY > -VELOCITY_XY_SPEED) {
+                if (velocityX > VELOCITY_XY_SPEED) {
                     setSlided(true);
-                } else {
+                } else if (velocityX < -VELOCITY_XY_SPEED) {
                     setSlided(false);
+                } else {
+                    if (mChildAt1.getLeft() >= mSlideMaxLimit - 20) {
+                        setSlided(true);
+                    } else {
+                        setSlided(false);
+                    }
                 }
+            }else{
+                setSlided(false);
             }
+
             event.setLocation(Integer.MAX_VALUE, 0);
             dispatchTouchEventToView(mChildAt1, event);
         } else {
